@@ -120,6 +120,10 @@ app.use((err, req, res, next) => {
   res.status(500).json({ error: 'Internal Server Error' });
 });
 
+server.get('*', (req, res) =>
+  res.sendFile(path.resolve('build', 'index.html'))
+);
+
 // Payment Setup
 
 // This is a public sample test API key.
