@@ -9,6 +9,67 @@
         "use": "@vercel/static"
       }
     ],
-  
-    "rewrites": [{ "source": "/(.*)", "destination": "index.js" }]
-  }
+    "routes": [
+    
+        {
+          "src": "/products",
+          "dest": "index.js"
+        },
+        {
+          "src": "/products/(.*)",
+          "dest": "index.js"
+        },
+        {
+          "src": "/users",
+          "dest": "index.js"
+        },
+        {
+          "src": "/users/(.*)",
+          "dest": "index.js"
+        },
+        {
+          "src": "/brands",
+          "dest": "index.js"
+        },
+        {
+          "src": "/brands/(.*)",
+          "dest": "index.js"
+        },
+        {
+          "src": "/categories",
+          "dest": "index.js"
+        },
+        {
+          "src": "/categories/(.*)",
+          "dest": "index.js"
+        },
+        {
+          "src": "/carts",
+          "dest": "index.js"
+        },
+        {
+          "src": "/carts/(.*)",
+          "dest": "index.js"
+        },
+        {
+          "src": "/userinfoes",
+          "dest": "index.js"
+        },
+        {
+          "src": "/userinfoes/(.*)",
+          "dest": "index.js"
+        },
+        {
+          "src": "/create-payment-intent",
+          "dest": "index.js"
+        },
+        {
+          "src": "/create-payment-intent",
+          "dest": "index.js"
+        },
+        {
+            "src": "/(.*)",
+            "dest": "/"
+          }
+      ]
+    }
