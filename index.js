@@ -20,12 +20,8 @@ const userInfoesRouter=require('./routes/UserInfo');
 const User = require('./model/User');
 const { isAuth,cookieExtractor } = require('./service/Common');
 const { checkTokenExpiration } = require('./controller/User');
-
 const app = express();
-
-
 const port = 8080;
-
 const opts = {};
 opts.jwtFromRequest = cookieExtractor;
 opts.secretOrKey = process.env.JWT_SECRET_KEY; 
@@ -34,14 +30,8 @@ app.use(session({
   resave: false,
   saveUninitialized: false,
 }));
-
 // Serve static files from the "build" directory
 app.use(express.static(path.resolve(__dirname, 'build')));
-
-// Define your routes and other middleware
-
-// Handle the root route ("/")
-
 app.use(cookieParser())
 app.use(passport.initialize());
 app.use(passport.session());
@@ -50,9 +40,6 @@ app.use(cors({
   // credentials: true,
   exposedHeaders: ['X-Total-Count']
 }));
-
-
-
 passport.use(new LocalStrategy(
   {
     usernameField: 'email',
@@ -129,16 +116,8 @@ app.use((err, req, res, next) => {
   res.status(500).json({ error: 'Internal Server Error' });
 });
 
-
 // Payment Setup
-
-// This is a public sample test API key.
-// Don’t submit any personally identifiable information in requests made with this key.
-// Sign in to see your own test API key embedded in code samples.
 const stripe = require("stripe")(process.env.STRIPE_KEY);
-
-
-
 app.post("https://amarstore-m6r7.onrender.com/create-payment-intent", async (req, res) => {
   const { totalAmount } = req.body;
 
@@ -156,7 +135,6 @@ app.post("https://amarstore-m6r7.onrender.com/create-payment-intent", async (req
     clientSecret: paymentIntent.client_secret,
   });
 });
-
 
 main().catch(err => console.log(err));
 async function main() {
