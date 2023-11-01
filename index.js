@@ -121,14 +121,15 @@ app.use('/brands',checkTokenExpiration, brandsRouter.router);
 app.use('/categories', categoriesRouter.router);
 app.use('/carts',checkTokenExpiration, cartsRouter.router);
 app.use('/userinfoes',checkTokenExpiration, userInfoesRouter.router);
+app.get('*', (req, res) =>
+res.sendFile(path.resolve('build', 'index.html'))
+);
 app.use((err, req, res, next) => {
   console.error(err);
   res.status(500).json({ error: 'Internal Server Error' });
 });
 
-app.get('*', (req, res) =>
-res.sendFile(path.resolve('build', 'index.html'))
-);
+
 // Payment Setup
 
 // This is a public sample test API key.
