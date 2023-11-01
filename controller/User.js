@@ -67,7 +67,7 @@ const resetPasswordRequest= async (req, res) => {
       },
     });
     // const resetLink = `http://localhost:3000/reset-password/${resetToken}`;
-    const resetLink = `https://amarstore-m6r7.onrender.com/reset-password?token=${resetToken}&email=${email}`;
+    const resetLink = `/reset-password?token=${resetToken}&email=${email}`;
     const mailOptions = {
       from: 'amarjeetkumarekma@gmail.com',
       to: email,

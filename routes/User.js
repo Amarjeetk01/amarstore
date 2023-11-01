@@ -10,6 +10,6 @@ router.post('/', createUsers)
   .get('/check', checkUser)
   .post('/login',passport.authenticate('local'), loginUser) 
   .post('/reset-password-request', resetPasswordRequest) 
-  .post('/reset-password', resetPassword)
+  .post('/reset-passwords', resetPassword)
 exports.router=router;
 
