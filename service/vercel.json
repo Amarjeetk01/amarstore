@@ -1,42 +1,13 @@
 {
+  "version": 2,
   "builds": [
     {
       "src": "index.js",
       "use": "@vercel/node"
-    },
-    {
-      "src": "build/**",
-      "use": "@vercel/static"
     }
   ],
   "routes": [
-    {
-      "src": "/api/products",
-      "dest": "/index.js"
-    },
-    {
-      "src": "/api/brands",
-      "dest": "/index.js"
-    },
-    {
-      "src": "/api/categories",
-      "dest": "/index.js"
-    },
-    {
-      "src": "/api/carts",
-      "dest": "/index.js"
-    },
-    {
-      "src": "/api/userinfoes",
-      "dest": "/index.js"
-    },
-    {
-      "src": "/api/create-payment-intent",
-      "dest": "/index.js"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "/index.html"
-    }
+    { "handle": "filesystem" },
+    { "src": "/(.*)", "dest": "/index.js" }
   ]
 }

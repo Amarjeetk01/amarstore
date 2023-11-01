@@ -35,7 +35,15 @@ app.use(session({
   saveUninitialized: false,
 }));
 
-app.use(express.static(path.resolve(__dirname, 'build')));
+// Serve static files from the "build" directory
+app.use(express.static(path.join(__dirname, 'build')));
+
+// Define your routes and other middleware
+
+// Handle the root route ("/")
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, 'build', 'index.html'));
+});
 app.use(cookieParser())
 app.use(passport.initialize());
 app.use(passport.session());
