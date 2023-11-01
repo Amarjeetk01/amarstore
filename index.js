@@ -36,14 +36,12 @@ app.use(session({
 }));
 
 // Serve static files from the "build" directory
-app.use(express.static(path.join(__dirname, 'build')));
+app.use(express.static(path.resolve(__dirname, 'build')));
 
 // Define your routes and other middleware
 
 // Handle the root route ("/")
-app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'build', 'index.html'));
-});
+
 app.use(cookieParser())
 app.use(passport.initialize());
 app.use(passport.session());
@@ -128,7 +126,9 @@ app.use((err, req, res, next) => {
   res.status(500).json({ error: 'Internal Server Error' });
 });
 
-
+app.get('*', (req, res) =>
+res.sendFile(path.resolve('build', 'index.html'))
+);
 // Payment Setup
 
 // This is a public sample test API key.
