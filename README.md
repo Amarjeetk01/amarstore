@@ -64,6 +64,6 @@ The frontend development server will be running on http://localhost:3000.
 ## Acknowledgments
 
 - Thanks to [Stripe](https://stripe.com) for their payment processing services.
-- Any other acknowledgments or credits you want to mention.
+
 
 
