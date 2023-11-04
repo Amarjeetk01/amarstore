@@ -112,57 +112,68 @@ const resetPasswordRequest= async (req, res) => {
   }
 };
 
-const resetPassword= async (req, res) => {
+const resetPassword = async (req, res) => {
   const { token, password, confirmPassword } = req.body;
 
   // Verify that the password and confirmPassword match
   if (password !== confirmPassword) {
     return res.status(400).json({ message: 'Passwords do not match' });
   }
-  try{
-      // Find the user by the reset token
-  const user = await User.findOne({ resetToken: token });
-// console.log(user)
-  if (!user) {
-    return res.status(404).json({ message: 'Invalid or expired token' });
-  }
-  // Hash the new password with bcrypt
-  const hashedPassword = await bcrypt.hash(password, 10);
-  // Update the user's password and reset the token and expiration
-  user.password = hashedPassword;
-  user.resetToken = null;
-  user.resetTokenExpiration = null;
-  await user.save();
-  // console.log("new user",user)
-  const transporter = nodemailer.createTransport({
-    service: 'gmail',
-    host: 'smtp.gmail.com',
-    port: 465,
-    secure: true,
-       auth: {
-         user: 'amarjeetkumarekma@gmail.com',
-         pass: process.env.MAIL_PASSWORD,
-       },
-     });
-     const mailOptions = {
-       from: 'amarjeetkumarekma@gmail.com',
-       to: user.email,
-       subject: 'Password Successfully Reset for "AmarStore"',
-       text: `Successfully able to Reset Password`,
-     };
-     transporter.sendMail(mailOptions, (error, info) => {
-       if (error) {
-         console.log(error);
-         res.sendStatus(400);
-       }
-        res.status(200).json({ message: 'Password reset successful' });
-     })
-  } catch(err){
-    console.log(err)
+
+  try {
+    // Find the user by the reset token
+    const user = await User.findOne({ resetToken: token });
+
+    if (!user) {
+      return res.status(404).json({ message: 'Invalid or expired token' });
+    }
+
+    // Hash the new password with bcrypt
+    const salt = crypto.randomBytes(16);
+    crypto.pbkdf2(password, salt, 310000, 32, 'sha256', async (err, hashedPassword) => {
+      if (err) {
+        return res.status(500).json({ message: 'Error hashing password' });
+      }
+
+      // Update the user's password and reset the token and expiration
+      user.password = hashedPassword.toString('hex');
+      user.resetToken = null;
+      user.resetTokenExpiration = null;
+
+      await user.save();
+
+      const transporter = nodemailer.createTransport({
+        service: 'gmail',
+        auth: {
+          user: 'amarjeetkumarekma@gmail.com',
+          pass: process.env.MAIL_PASSWORD,
+        },
+      });
+
+      const mailOptions = {
+        from: 'amarjeetkumarekma@gmail.com',
+        to: user.email,
+        subject: 'Password Successfully Reset for "AmarStore"',
+        text: 'Successfully reset your password for AmarStore',
+      };
+
+      transporter.sendMail(mailOptions, (error, info) => {
+        if (error) {
+          console.error(error);
+          return res.status(400).json({ message: 'Error sending email' });
+        }
+        
+        return res.status(200).json({ message: 'Password reset successful' });
+      });
+    });
+  } catch (err) {
+    console.error(err);
     return res.status(500).json({ message: 'Error resetting password' });
   }
-  // return res.status(200).json({ message: 'Password reset successful' });
 };
+
+// Assuming you have required the necessary modules (crypto, nodemailer, User model)
+
 
 const checkUser = (req, res, next) => {
   passport.authenticate('jwt', { session: false }, (err, user, info) => {
