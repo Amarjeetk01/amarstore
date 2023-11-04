@@ -1,4 +1,4 @@
-# E-commerce Application (AmarAtore)
+# E-commerce Application (AmarStore)
 
 This is an e-commerce application with both a frontend and backend. The project is divided into two parts: the frontend, built with React, and the backend, built with Node.js and Express.
 
