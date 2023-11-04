@@ -35,11 +35,12 @@ bower_components
 # node-waf configuration
 .lock-wscript
 
-buildCopy
 
 # Dependency directories
 node_modules/
 jspm_packages/
+
+buildCopy/
 
 # Snowpack dependency directory (https://snowpack.dev/)
 web_modules/
