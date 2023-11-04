@@ -41,6 +41,7 @@ const fetchDataByFilter = async (req, res) => {
         res.status(400).json(err);
     }
 }
+  
 
 const fetchDataById = async (req, res) => {
     const {id} = req.params;

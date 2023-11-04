@@ -4,6 +4,9 @@ const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 const md5 = require('md5');
 const nodemailer = require('nodemailer');
+const express = require('express');
+const LocalStrategy = require('passport-local');
+const crypto = require('crypto');
 
 const loginUser =  (req, res, next) => {
   passport.authenticate('local', (err, user, info) => {
@@ -13,14 +16,13 @@ const loginUser =  (req, res, next) => {
     }
     req.login(user, async (err) => {
       if (err) return next(err);
-      const token = jwt.sign({ email: user.email, id: user.id, imageUrl: user.gravatar }, process.env.JWT_SECRET_KEY, { expiresIn: '1h' });
-      res.cookie('token', token, {maxAge: 360000, httpOnly: true });
-      // console.log(token)
+      const token = jwt.sign({ email: user.email, id: user.id }, process.env.JWT_SECRET_KEY, { expiresIn: '1d' });
+      res.cookie('jwt', token, { maxAge: 86400000, httpOnly: true });
       return res.status(200).json({ email: user.email, id: user.id,imageUrl:user.gravatar });
     });
   })(req, res, next);
 }
-const createUsers = async (req, res) => {
+const createUsers = async (req, res, next) => {
   try {
     // console.log(req.body)
     const { email, password } = req.body;
@@ -28,16 +30,38 @@ const createUsers = async (req, res) => {
     if (existingUser) {
       return res.status(409).json('Email already exists' );
     }
-    const hashedPassword = await bcrypt.hash(password, 10); // Hash the password with a salt factor of 10
-    const gravatar = `https://www.gravatar.com/avatar/${md5(email)}`;
-    const newUser = new User({ email, password: hashedPassword,gravatar }); // Make sure to store the hashed password
-    await newUser.save();
-    return res.status(201).json({ message: 'User created successfully' });
+    const salt = crypto.randomBytes(16);
+    crypto.pbkdf2(password, salt, 310000, 32, 'sha256', async function(err, hashedPassword) {
+      if (err) { return next(err); }
+      const gravatar = `https://www.gravatar.com/avatar/${md5(email)}`;
+      const newUser = new User({ email, password: hashedPassword, salt,gravatar });
+      // const doc = await newUser.save();
+      newUser.save()
+      .then((doc) => {
+        const token = jwt.sign({ email: doc.email, id: doc.id }, process.env.JWT_SECRET_KEY, { expiresIn: '1d' });
+        res.cookie('jwt', token, { maxAge: 86400000, httpOnly: true });
+        return res.status(200).json({ email: doc.email, id: doc.id, imageUrl: doc.gravatar });
+      })
+      .catch((err) => {
+        console.error(err);
+        return res.status(500).json({ message: 'Error creating user' });
+      });
+  });
+    // return res.status(201).json({ message: 'User created successfully' });
   } catch (err) {
     console.error(err); // Log the error for debugging
     return res.status(500).json({ message: 'Error creating user' });
   }
 }
+
+const logout = async (req, res) => {
+  res
+    .cookie('jwt', null, {
+      expires: new Date(Date.now()),
+      httpOnly: true,
+    })
+    .sendStatus(200)
+};
 
 // Generate a random reset token and save it to the user's document in the database
 const resetPasswordRequest= async (req, res) => {
@@ -140,28 +164,17 @@ const resetPassword= async (req, res) => {
   // return res.status(200).json({ message: 'Password reset successful' });
 };
 
-const checkTokenExpiration = (req, res, next) => {
-  // Get the token from the cookie
-  const token = req.cookies.token;
-
-  if (!token) {
-    return res.status(401).json({ message: 'Unauthorized' });
-  }
-
-  jwt.verify(token, process.env.JWT_SECRET_KEY, (err, decoded) => {
+const checkUser = (req, res, next) => {
+  passport.authenticate('jwt', { session: false }, (err, user, info) => {
     if (err) {
-      // Token is expired, clear the cookie and log the user out
-      res.clearCookie('token');
-      return res.status(401).json({ message: 'Token has expired' });
+      return next(err);
     }
-    // Token is valid, continue with the request
-    next();
-  });
+    if (!user) {
+      return res.status(401).json({ message: 'Unauthorized' });
+    }
+    req.user = user; // Attach the user to the request object for further use
+    return res.status(200).json({ email: user.email, id: user.id,imageUrl:user.gravatar });
+  })(req, res, next);
 };
 
-const checkUser = async (req, res) => {
-  // You can access req.user here and respond accordingly
-  res.status(200).json(req.user);
-};
-
-module.exports = { createUsers, checkUser, loginUser,resetPasswordRequest,resetPassword,checkTokenExpiration };
+module.exports = { createUsers, checkUser, loginUser,resetPasswordRequest,resetPassword,logout };

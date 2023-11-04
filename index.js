@@ -7,6 +7,7 @@ const passport = require('passport');
 const LocalStrategy = require('passport-local').Strategy; // Correct the import
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
+const crypto = require('crypto');
 const JwtStrategy = require('passport-jwt').Strategy;
 const ExtractJwt = require('passport-jwt').ExtractJwt;
 const cookieParser = require('cookie-parser');
@@ -18,13 +19,12 @@ const usersRouter=require('./routes/User')
 const cartsRouter=require('./routes/Cart')
 const userInfoesRouter=require('./routes/UserInfo');
 const User = require('./model/User');
-const { isAuth,cookieExtractor } = require('./service/Common');
-const { checkTokenExpiration } = require('./controller/User');
+const { cookieExtractor, isAuth } = require('./service/Common');
 const app = express();
 const port = 8080;
 const opts = {};
 opts.jwtFromRequest = cookieExtractor;
-opts.secretOrKey = process.env.JWT_SECRET_KEY; 
+opts.secretOrKey = process.env.JWT_SECRET_KEY;
 app.use(session({
   secret: process.env.SESSION_KEY,
   resave: false,
@@ -36,11 +36,9 @@ app.use(cookieParser())
 app.use(passport.initialize());
 app.use(passport.session());
 app.use(cors({
-  // origin: 'http://localhost:3000',
-  // credentials: true,
   exposedHeaders: ['X-Total-Count']
 }));
-passport.use(new LocalStrategy(
+passport.use('local',new LocalStrategy(
   {
     usernameField: 'email',
     passwordField: 'password',
@@ -53,29 +51,32 @@ passport.use(new LocalStrategy(
         return done(null, false, { message: 'Incorrect email or password' });
       }
 
-      const isValidPassword = await bcrypt.compare(password, user.password); // Compare the provided password with the stored hashed password
-
-      if (!isValidPassword) {
-        return done(null, false, { message: 'Incorrect email or password' });
-      }
-      return done(null,user);
+      crypto.pbkdf2(password, user.salt, 310000, 32, 'sha256', function(err, hashedPassword) {
+        if (err) { return done(err); }
+        if (!crypto.timingSafeEqual(user.password, hashedPassword)) {
+          return done(null, false, { message: 'Incorrect username or password.' });
+        }
+        return done(null,user);
+      });
     } catch (err) {
       return done(err);
     }
   }
 ));
-passport.use(
-  'jwt',
+passport.use('jwt',
   new JwtStrategy(opts, async function (jwt_payload, done) {
     try {
-      console.log(jwt_payload)
+      // console.log('Received token:', jwt_payload);
       const user = await User.findById(jwt_payload.id);
       if (user) {
-        return done(null, { email: user.email, id: user.id,imageUrl:user.gravatar }); 
+        // console.log('User found:', user);
+        return done(null, user);
       } else {
+        console.log('User not found');
         return done(null, false);
       }
     } catch (err) {
+      console.error('Error in JWT strategy:', err);
       return done(err, false);
     }
   })
@@ -103,11 +104,11 @@ passport.deserializeUser(async (id, done) => {
 
 app.use(express.json())
 app.use('/users', usersRouter.router);
-app.use('/products',checkTokenExpiration, productsRouter.router);
-app.use('/brands',checkTokenExpiration, brandsRouter.router);
+app.use('/products', productsRouter.router);
+app.use('/brands', brandsRouter.router);
 app.use('/categories', categoriesRouter.router);
-app.use('/carts',checkTokenExpiration, cartsRouter.router);
-app.use('/userinfoes',checkTokenExpiration, userInfoesRouter.router);
+app.use('/carts',isAuth, cartsRouter.router);
+app.use('/userinfoes',isAuth, userInfoesRouter.router);
 app.get('*', (req, res) =>
 res.sendFile(path.resolve('build', 'index.html'))
 );

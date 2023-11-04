@@ -11,9 +11,11 @@ const createUserInfo = async (req, res) => {
 }
 
 const fetchUserInfoDetails = async (req, res) => {
-  const { id } = req.params;
+  // const { id } = req.params;
+  const userId = req.user._id.toString();
+  // console.log(userId)
   try {
-    const user = await UserInfo.findOne({ user: id }).populate('user')
+    const user = await UserInfo.findOne({ user: userId }).populate('user')
     .populate({
       path: 'order.items.product',
       model: 'Product', // Reference to your Product model
@@ -31,12 +33,13 @@ const fetchUserInfoDetails = async (req, res) => {
 
 
 const updateUserInfo = async (req, res) => {
-  const { id } = req.params;
+  // const { id } = req.params;
+  const userId = req.user._id.toString();
   const updatedUserData = req.body;
 
   try {
     // Use findOneAndUpdate to update the user information based on the user's ID
-    const user = await UserInfo.findOneAndUpdate({ user: id }, updatedUserData, { new: true });
+    const user = await UserInfo.findOneAndUpdate({ user: userId }, updatedUserData, { new: true });
 
     if (!user) {
       return res.status(404).json({ message: 'User information not found' });

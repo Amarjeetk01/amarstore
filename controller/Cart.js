@@ -1,9 +1,12 @@
 const Cart = require('../model/Cart');
 
 const fetchItemsById = async (req, res) => {
-  const { user } = req.query;
+  // const { user } = req.query;
+  // console.log("cart cj=heck",req.user._id.toString())
+  const userId = req.user._id.toString();
   try {
-    const carts = await Cart.find({ user: user }).populate('product').populate('user');
+    const carts = await Cart.find({ user: userId }).populate('product').populate('user');
+    // const carts = await Cart.find({ user: id }).populate('product').populate('user');
     res.status(200).json(carts);
   } catch (err) {
     res.status(500).json({ error: err.message });
