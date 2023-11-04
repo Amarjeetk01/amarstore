@@ -136,7 +136,8 @@ const resetPassword = async (req, res) => {
       }
 
       // Update the user's password and reset the token and expiration
-      user.password = hashedPassword.toString('hex');
+      user.password = hashedPassword;
+      user.salt=salt;
       user.resetToken = null;
       user.resetTokenExpiration = null;
 
