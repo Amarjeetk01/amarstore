@@ -1,3 +1,4 @@
+buildCopy
 # Logs
 logs
 *.log
@@ -40,7 +41,6 @@ bower_components
 node_modules/
 jspm_packages/
 
-/buildCopy/
 
 
 # Snowpack dependency directory (https://snowpack.dev/)
