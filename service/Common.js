@@ -14,7 +14,7 @@ const isAuth = (req, res, next) => {
     if (req && req.cookies) {
         token = req.cookies['jwt'];
     }
-    // token="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImFtYXJrcmt1bWFyODJAZ21haWwuY29tIiwiaWQiOiI2NTQ1ZGY4NTgyZGYwMjIxNDk0Njk5OWMiLCJpYXQiOjE2OTkwOTA0MzIsImV4cCI6MTY5OTE3NjgzMn0.hSG4JRr0spRjGRfyajQi0wKC5okQhw8Chc4Y53WM6qo"
+    // token="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImFtYXJrcmt1bWFyODJAZ21haWwuY29tIiwiaWQiOiI2NTQ2OTgwZDg2ODI0YTg5MGMwMThkNDgiLCJpYXQiOjE2OTk3NjY5NjAsImV4cCI6MTY5OTg1MzM2MH0.ClSZHiQC84lA41kppn3GC4TxeuaWInYyyIrukTPDwbw"
     return token;
 };
 
