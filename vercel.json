@@ -9,9 +9,9 @@
         "src": "dist/**",
         "use": "@vercel/static"
       }
-    ],
+    ], 
     "routes": [
-      { "src": "/api/.*", "dest": "index.js" },
-      { "src": "/(.*)", "dest": "dist/$1" }
+      { "handle": "filesystem" },
+      { "src": "/.*", "dest": "/index.js" }
     ]
   }
