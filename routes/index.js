@@ -40,7 +40,7 @@ router.delete('/cart/:id',auth, cartController.deleteCartById);
 
 //payments
 router.post('/checkout',auth, paymentController.checkout);
-router.post('/webhook',auth, paymentController.webhook);
+router.post('/webhook', paymentController.webhook);
 router.post('/payment-success',auth, paymentController.paymentSucess);
 
 //extra admin action
