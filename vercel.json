@@ -11,11 +11,12 @@
     }
   ],
   "routes": [
-    { "src": "/api/(.*)", "dest": "/index.js" },
     {
-      "src": "/(.*)",
-      "dest": "/dist/$1",
-      "status": 404
+      "src": "/api/(.*)",
+      "dest": "/index.js"
+    },
+    {
+      "handle": "filesystem"
     },
     {
       "src": "/(.*)",
