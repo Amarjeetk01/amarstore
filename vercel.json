@@ -1,5 +1,4 @@
-{
-  "version": 2,
+"version": 2,
   "builds": [
     {
       "src": "index.js",
@@ -11,16 +10,14 @@
     }
   ],
   "routes": [
+    { "handle": "filesystem" },
     {
       "src": "/api/(.*)",
       "dest": "/index.js"
     },
     {
-      "handle": "filesystem"
-    },
-    {
       "src": "/(.*)",
-      "dest": "/dist/index.html"
+      "dest": "/dist/$1"
     }
   ]
 }
