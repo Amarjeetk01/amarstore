@@ -65,27 +65,33 @@ const paymentController = {
   // Webhook
   async webhook(req, res, next) {
     try {
-      const rawBody = await req.text();
+      const rawBody = req.rawBody;
       const signature = req.headers['stripe-signature'];
 
-      const event = stripe.webhooks.constructEvent(rawBody, signature, STRIPE_WEBHOOK_SECRET);
+      let event;
+      try {
+        event = stripe.webhooks.constructEvent(rawBody, signature, STRIPE_WEBHOOK_SECRET);
+      } catch (err) {
+        console.log(`⚠️  Webhook signature verification failed.`, err.message);
+        return res.sendStatus(400);
+      }
 
       if (event.type === 'checkout.session.completed') {
         const session = event.data.object;
 
         const customerInfo = {
-          user: session?.client_reference_id || '',
-          name: session?.customer_details?.name,
-          email: session?.customer_details?.email,
+          user: session.client_reference_id || '',
+          name: session.customer_details?.name,
+          email: session.customer_details?.email,
         };
 
-        const paymentToken = session?.metadata?.paymentToken;
+        const paymentToken = session.metadata?.paymentToken;
         const shippingAddress = {
-          street: session?.shipping_details?.address?.line1,
-          city: session?.shipping_details?.address?.city,
-          state: session?.shipping_details?.address?.state,
-          postalCode: session?.shipping_details?.address?.postal_code,
-          country: session?.shipping_details?.address?.country,
+          street: session.shipping_details?.address?.line1,
+          city: session.shipping_details?.address?.city,
+          state: session.shipping_details?.address?.state,
+          postalCode: session.shipping_details?.address?.postal_code,
+          country: session.shipping_details?.address?.country,
         };
 
         const retrieveSession = await stripe.checkout.sessions.retrieve(
@@ -93,22 +99,20 @@ const paymentController = {
           { expand: ['line_items.data.price.product'] }
         );
 
-        const lineItems = retrieveSession?.line_items?.data || [];
+        const lineItems = retrieveSession.line_items.data || [];
         const orderItems = lineItems.map((item) => {
-          const metadata = item?.price?.product?.metadata || {};
+          const metadata = item.price.product.metadata || {};
           return {
             product: metadata.productId,
-            // color: metadata.color || 'N/A',
-            // size: metadata.size || 'N/A',
             quantity: item.quantity,
           };
         });
 
         const newOrder = new Order({
-          user: customerInfo.user,
+          customer: customerInfo.user,
           products: orderItems,
           shippingAddress,
-          shippingRate: session?.shipping_cost?.shipping_rate,
+          shippingRate: session.shipping_cost?.shipping_rate,
           totalAmount: session.amount_total ? session.amount_total / 100 : 0,
         });
 
@@ -118,20 +122,21 @@ const paymentController = {
 
         if (customer) {
           customer.orders.push(newOrder.id);
-          await Customer.findByIdAndUpdate(customer.id, { paymentToken: paymentToken });
+          await Customer.findByIdAndUpdate(customer.id, { paymentToken });
         } else {
           customer = new Customer({
             ...customerInfo,
             orders: [newOrder.id],
-            paymentToken: paymentToken
+            paymentToken
           });
         }
 
         await customer.save();
-        // After successful payment
         await sendEmail(customer.email, 'Order Confirmation', newOrder.id);
+        await Cart.deleteMany({ user: customerInfo.user });
       }
-      res.json();
+
+      res.json({ received: true });
     } catch (err) {
       return next(err);
     }
@@ -152,7 +157,6 @@ const paymentController = {
       }
       customer.paymentToken = null;
       await customer.save();
-      await Cart.deleteMany({ user: userId });
       return res.json({status:1});
     } catch (err) {
       return next(err);

@@ -1,5 +1,4 @@
 import express from "express";
-
 import {
   APP_PORT,
   DB_URL,
@@ -14,23 +13,35 @@ import cors from "cors";
 import cookieParser from "cookie-parser";
 import session from "express-session";
 import path from "path";
+import { fileURLToPath } from "url";
+import bodyParser from "body-parser";
+
+// ES module workaround for __dirname
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // Database connection
 main().catch((err) => console.log(err));
 async function main() {
-  // await mongoose.connect("mongodb://127.0.0.1:27017/ecommerceDB");
   await mongoose.connect(DB_URL);
   console.log("database connected");
 }
 
+app.use(bodyParser.urlencoded({extended:false}))
+app.use(bodyParser.json({
+  verify:(req,res,buf)=>{
+    req.rawBody=buf
+  }
+}))
+
 const corsOptions = {
-  origin: { ECOMMERCE_STORE_URL },
+  origin: ECOMMERCE_STORE_URL,
   credentials: true,
 };
 app.use(cors(corsOptions));
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
-app.use(express.static( 'dist'));
+app.use(express.static(path.join(__dirname, "dist")));
 app.use(cookieParser());
 app.use(
   session({
@@ -44,15 +55,17 @@ app.use(
     },
   })
 );
+
+
 app.use("/api", routes);
+app.use("*", (req, res) =>
+  res.sendFile(path.join(__dirname, "dist", "index.html"))
+);
 app.use("/", (req, res) => {
   res.send(`
   <h1>Welcome ...</h1>
   `);
 });
-app.get('*', (req, res) =>
-res.sendFile('dist', 'index.html')
-);
 
 app.use(errorHandler);
 const PORT = process.env.PORT || APP_PORT;

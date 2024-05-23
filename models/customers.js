@@ -5,7 +5,7 @@ const customerSchema = new Schema({
     name: { type: String},
     email: { type: String, },
     user: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
-    orders: {type: [{ type: mongoose.Schema.Types.ObjectId, ref: "Order" }],},
+    orders: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Order' }], 
     paymentToken: { type: String, },
 }, { timestamps: true });
 
