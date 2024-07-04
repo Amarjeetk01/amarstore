@@ -12,6 +12,17 @@
   ],
   "routes": [
     { "src": "/api/(.*)", "dest": "/index.js" },
+    { "src": "/login", "dest": "/dist/index.html" },
+    { "src": "/signup", "dest": "/dist/index.html" },
+    { "src": "/cart(.*)", "dest": "/dist/index.html" },
+    { "src": "/orders(.*)", "dest": "/dist/index.html" },
+    { "src": "/wishlist(.*)", "dest": "/dist/index.html" },
+    { "src": "/products(.*)", "dest": "/dist/index.html" },
+    { "src": "/order-success(.*)", "dest": "/dist/index.html" },
+    { "src": "/forgot-password(.*)", "dest": "/dist/index.html" },
+    { "src": "/reset-password(.*)", "dest": "/dist/index.html" },
+    { "src": "/admin(.*)", "dest": "/dist/index.html" },
+    { "handle": "filesystem" },
     { "src": "/(.*)", "dest": "/dist/$1" }
   ]
 }
