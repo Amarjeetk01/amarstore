@@ -1,4 +1,5 @@
 import express from 'express';
+import passport from 'passport';
 const router = express.Router();
 import { registerController, loginController, usersController, productsController, ordersController, cartController, paymentController, adminController, } from '../controllers/index.js';
 import auth from '../middlewares/auth.js';
@@ -11,8 +12,20 @@ router.post('/logout', auth, loginController.logout);
 router.get('/me', auth, usersController.me);
 router.post('/reset-password-request', usersController.resetPasswordRequest);
 router.post('/reset-passwords', usersController.resetPassword);
+router.post('/send-otp',auth, usersController.sendOtp);
+router.post('/verify-otp',auth, usersController.verifyOtp);
 router.post('/wishlist', auth, usersController.addToWishlist);
 router.get('/wishlist', auth, usersController.getWishlistProducts);
+router.get('/visitor-count', usersController.getVisitorCount);
+
+// Google auth
+router.get('/auth/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
+router.get('/auth/google/callback', passport.authenticate('google', { failureRedirect: '/login' }), (req, res) => {
+  const token = JwtService.sign({ id: req.user.id });
+  res.cookie('access_token', token, { httpOnly: true });
+  res.redirect('/');
+});
+router.post('/auth/google', registerController.loginWithGoogle);
 
 
 //products
@@ -41,7 +54,7 @@ router.delete('/cart/:id',auth, cartController.deleteCartById);
 //payments
 router.post('/checkout',auth, paymentController.checkout);
 router.post('/webhook', paymentController.webhook);
-router.post('/payment-success',auth, paymentController.paymentSucess);
+router.post('/payment-success',auth, paymentController.paymentSuccess);
 
 //extra admin action
 router.get('/all-customers',auth, adminController.getAllCustomers);

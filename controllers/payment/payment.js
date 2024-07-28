@@ -143,7 +143,7 @@ const paymentController = {
   },
 
   //payment-success
-  async paymentSucess(req,res,next){
+  async paymentSuccess(req,res,next){
     try {
       const  userId  = req.user.id;
       const { token } = await req.json();

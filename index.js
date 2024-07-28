@@ -15,6 +15,7 @@ import session from "express-session";
 import path from "path";
 import { fileURLToPath } from "url";
 import bodyParser from "body-parser";
+import passport from "./middlewares/googleAuth.js";
 
 // ES module workaround for __dirname
 const __filename = fileURLToPath(import.meta.url);
@@ -43,6 +44,7 @@ app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
 app.use(express.static(path.join(__dirname, "dist")));
 app.use(cookieParser());
+// app.use(passport.initialize());
 app.use(
   session({
     secret: SESSION_SECRET,

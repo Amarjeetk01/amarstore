@@ -181,7 +181,7 @@ const productsController = {
     const { id } = req.params;
     try {
       await Product.findByIdAndDelete(id);
-      res.json({ status: "sucess" });
+      res.json({ status: "success" });
     } catch (err) {
       return next(err);
     }
@@ -195,12 +195,12 @@ const productsController = {
       }
 
       let collections = [];
-      let uniqueCategorys = new Set();
+      let uniqueCategory = new Set();
 
       products.forEach((product) => {
         const lowerCaseCategory = product.category.toLowerCase();
-        if (!uniqueCategorys.has(lowerCaseCategory)) {
-          uniqueCategorys.add(lowerCaseCategory);
+        if (!uniqueCategory.has(lowerCaseCategory)) {
+          uniqueCategory.add(lowerCaseCategory);
           collections.push({
             collectionName: lowerCaseCategory,
             collection: products
