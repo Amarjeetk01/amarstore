@@ -19,12 +19,15 @@ router.get('/wishlist', auth, usersController.getWishlistProducts);
 router.get('/visitor-count', usersController.getVisitorCount);
 
 // Google auth
-router.get('/auth/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
-router.get('/auth/google/callback', passport.authenticate('google', { failureRedirect: '/login' }), (req, res) => {
-  const token = JwtService.sign({ id: req.user.id });
-  res.cookie('access_token', token, { httpOnly: true });
-  res.redirect('/');
-});
+router.get('/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
+router.get('/auth/google/callback', 
+  passport.authenticate('google', { failureRedirect: '/login' }),
+  (req, res) => {
+    const token = JwtService.sign({ id: req.user.id });
+    res.cookie('access_token', token, { httpOnly: true });
+    res.redirect('/');
+  }
+);
 router.post('/auth/google', registerController.loginWithGoogle);
 
 

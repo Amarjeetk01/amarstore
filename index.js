@@ -6,7 +6,6 @@ import {
   SESSION_SECRET,
 } from "./config/index.js";
 import errorHandler from "./middlewares/errorHandler.js";
-const app = express();
 import routes from "./routes/index.js";
 import mongoose from "mongoose";
 import cors from "cors";
@@ -28,12 +27,14 @@ async function main() {
   console.log("database connected");
 }
 
-app.use(bodyParser.urlencoded({extended:false}))
+const app = express();
+
+app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json({
-  verify:(req,res,buf)=>{
-    req.rawBody=buf
+  verify: (req, res, buf) => {
+    req.rawBody = buf;
   }
-}))
+}));
 
 const corsOptions = {
   origin: ECOMMERCE_STORE_URL,
@@ -44,7 +45,6 @@ app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
 app.use(express.static(path.join(__dirname, "dist")));
 app.use(cookieParser());
-// app.use(passport.initialize());
 app.use(
   session({
     secret: SESSION_SECRET,
@@ -58,6 +58,8 @@ app.use(
   })
 );
 
+app.use(passport.initialize());
+app.use(passport.session());
 
 app.use("/api", routes);
 app.use("*", (req, res) =>
@@ -70,5 +72,6 @@ app.use("/", (req, res) => {
 });
 
 app.use(errorHandler);
+
 const PORT = process.env.PORT || APP_PORT;
 app.listen(PORT, () => console.log(`Listening on port ${PORT}.`));

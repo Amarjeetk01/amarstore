@@ -1,43 +1,26 @@
 {
-    "version": 2,
-    "builds": [
-      {
-        "src": "index.js",
-        "use": "@vercel/node"
-      },
-      {
-        "src": "dist/**/*",
-        "use": "@vercel/static"
-      }
-    ],
-    "routes": [
-      { "src": "/login", "dest": "/dist/index.html" },
-      { "src": "/signup", "dest": "/dist/index.html" },
-      { "src": "/cart(.*)", "dest": "/dist/index.html" },
-      { "src": "/orders(.*)", "dest": "/dist/index.html" },
-      { "src": "/wishlist(.*)", "dest": "/dist/index.html" },
-      { "src": "/products(.*)", "dest": "/dist/index.html" },
-      { "src": "/order-success(.*)", "dest": "/dist/index.html" },
-      { "src": "/forgot-password(.*)", "dest": "/dist/index.html" },
-      { "src": "/reset-password(.*)", "dest": "/dist/index.html" },
-      { "src": "/admin/products/(.*)", "dest": "/dist/index.html" },
-      { "src": "/admin/collections(.*)", "dest": "/dist/index.html" },
-      { "src": "/admin/customers(.*)", "dest": "/dist/index.html" },
-      { "src": "/admin/orders(.*)", "dest": "/dist/index.html" },
-      { "src": "/admin(.*)", "dest": "/dist/index.html" },
-      { "src": "/product/(.*)", "dest": "/dist/index.html" },
-      { "src": "/api/(.*)", "dest": "/index.js" },
-      { "src": "/login", "dest": "/dist/index.html" },
-      { "src": "/signup", "dest": "/dist/index.html" },
-      { "src": "/cart(.*)", "dest": "/dist/index.html" },
-      { "src": "/orders(.*)", "dest": "/dist/index.html" },
-      { "src": "/wishlist(.*)", "dest": "/dist/index.html" },
-      { "src": "/products(.*)", "dest": "/dist/index.html" },
-      { "src": "/order-success(.*)", "dest": "/dist/index.html" },
-      { "src": "/forgot-password(.*)", "dest": "/dist/index.html" },
-      { "src": "/reset-password(.*)", "dest": "/dist/index.html" },
-      { "src": "/admin(.*)", "dest": "/dist/index.html" },
-      { "handle": "filesystem" },
-      { "src": "/(.*)", "dest": "/dist/$1" }
-    ]
-  }
+  "version": 2,
+  "builds": [
+    {
+      "src": "index.js",
+      "use": "@vercel/node"
+    },
+    {
+      "src": "dist/**/*",
+      "use": "@vercel/static"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/api/(.*)",
+      "dest": "/index.js"
+    },
+    {
+      "handle": "filesystem"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/dist/$1"
+    }
+  ]
+}
