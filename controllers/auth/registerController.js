@@ -11,7 +11,9 @@ const registerController = {
     try {
       const exist = await User.exists({ email: req.body.email });
       if (exist) {
-        return next(CustomErrorHandler.alreadyExist("This email is already taken."));
+        return next(
+          CustomErrorHandler.alreadyExist("This email is already taken.")
+        );
       }
     } catch (err) {
       return next(err);
@@ -33,7 +35,7 @@ const registerController = {
     } catch (err) {
       return next(err);
     }
-    res.cookie('access_token', access_token, { httpOnly: true });
+    res.cookie("access_token", access_token, { httpOnly: true });
     //update visitor count
     const totalVisit = await Visitor.findOne();
     if (totalVisit) {
@@ -56,25 +58,40 @@ const registerController = {
           audience: process.env.GOOGLE_CLIENT_ID,
         });
       } catch (verificationError) {
-        console.error('Error verifying token:', verificationError);
-        return next(CustomErrorHandler.serverError('Token verification failed'));
+        console.error("Error verifying token:", verificationError);
+        return next(
+          CustomErrorHandler.serverError("Token verification failed")
+        );
       }
       const payload = ticket.getPayload();
-      const userId = payload['sub'];
+      const userId = payload["sub"];
 
+      // Check if a user with this Google ID already exists
       let user = await User.findOne({ googleId: userId });
+
+      // If not, check if a user with the same email exists
       if (!user) {
-        user = new User({
-          googleId: userId,
-          name: payload.name,
-          email: payload.email,
-          avatar: payload.picture,
-        });
-        await user.save();
+        user = await User.findOne({ email: payload.email });
+        if (user) {
+          // Update the existing user's information
+          user.googleId = userId;
+          user.name = payload.name;
+          user.avatar = payload.picture;
+          await user.save();
+        } else {
+          // If no user with the email exists, create a new user
+          user = new User({
+            googleId: userId,
+            name: payload.name,
+            email: payload.email,
+            avatar: payload.picture,
+          });
+          await user.save();
+        }
       }
       const accessToken = JwtService.sign({ id: user.id });
-      res.cookie('access_token', accessToken, { httpOnly: true });
-      //update visitor count
+      res.cookie("access_token", accessToken, { httpOnly: true });
+      // Update visitor count
       const totalVisit = await Visitor.findOne();
       if (totalVisit) {
         totalVisit.visitCount += 1;
